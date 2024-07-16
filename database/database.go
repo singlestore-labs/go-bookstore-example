@@ -19,6 +19,6 @@ func InitializeDB() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	log.Println("Connected to database")
-	db.AutoMigrate(&model.Book{}, &model.Order{}, &model.OrderItem{})
+	db.AutoMigrate(&model.Book{})
 	DB = db
 }

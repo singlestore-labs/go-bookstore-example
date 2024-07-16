@@ -122,10 +122,8 @@ func TestDeleteBook(t *testing.T) {
 		if err != nil {
 			t.Errorf("expected nil error, got %s", err)
 		}
-
-		// Verify the book is deleted
-		_, getErr := GetBook(createdBook.ID)
-		if getErr == nil {
+		getBook := GetBook(createdBook.ID)
+		if getBook.ID != 0 {
 			t.Errorf("expected error when getting deleted book, got nil")
 		}
 	})
@@ -155,12 +153,10 @@ func TestGetBook(t *testing.T) {
 	createdBook, _ := CreateBook(book)
 
 	// Act
-	retrievedBook, err := GetBook(createdBook.ID)
+	retrievedBook := GetBook(createdBook.ID)
 
 	// Assert
-	if err != nil {
-		t.Errorf("expected nil error, got %s", err)
-	} else if retrievedBook.ID != createdBook.ID {
+	if retrievedBook.ID != createdBook.ID {
 		t.Errorf("expected ID %d, got %d", createdBook.ID, retrievedBook.ID)
 	} else if retrievedBook.Title != book.Title {
 		t.Errorf("expected title %s, got %s", book.Title, retrievedBook.Title)

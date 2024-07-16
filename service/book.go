@@ -29,17 +29,14 @@ func DeleteBook(book model.Book) error {
 	return nil
 }
 
-func GetBook(id int) (model.Book, error) {
-	var book model.Book
-	result := database.DB.First(&book, "id = ?", id)
-	if result.Error != nil {
-		return model.Book{}, result.Error
-	}
-	return book, nil
+func GetBook(id int) model.Book {
+	book := model.Book{}
+	database.DB.Find(&book, "id = ?", id)
+	return book
 }
 
 func GetAllBooks() []model.Book {
-	var books []model.Book
+	books := []model.Book{}
 	database.DB.Find(&books)
 	return books
 }

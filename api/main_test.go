@@ -1,4 +1,4 @@
-package service
+package api
 
 import (
 	"bookstore/config"
@@ -9,11 +9,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )
 
 func TestMain(m *testing.M) {
 	ConnectTestDB()
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	RegisterRoutes(r)
+	Router = r
+
 	// run tests
 	exitVal := m.Run()
 	os.Exit(exitVal)

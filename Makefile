@@ -7,10 +7,9 @@ clean:
 	rm coverage.html
 
 run:
-	. .env
-	go get .
-	go run main.go
+	chmod +x scripts/run.sh
+	./scripts/run.sh
 
 test:
-	go test ./... -race -covermode=atomic -coverprofile=coverage.out -v
-	go tool cover -html coverage.out -o coverage.html
+	chmod +x scripts/test.sh
+	./scripts/test.sh

@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>database: Go Coverage Report</title>
+		<title>api: Go Coverage Report</title>
 		<style>
 			body {
 				background: black;
@@ -55,15 +55,15 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">bookstore/database/database.go (85.7%)</option>
+				<option value="file0">bookstore/api/book.go (100.0%)</option>
 				
-				<option value="file1">bookstore/main.go (0.0%)</option>
+				<option value="file1">bookstore/api/routes.go (55.6%)</option>
 				
-				<option value="file2">bookstore/model/order.go (100.0%)</option>
+				<option value="file2">bookstore/database/database.go (85.7%)</option>
 				
-				<option value="file3">bookstore/service/book.go (100.0%)</option>
+				<option value="file3">bookstore/main.go (0.0%)</option>
 				
-				<option value="file4">bookstore/service/order.go (100.0%)</option>
+				<option value="file4">bookstore/service/book.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -86,7 +86,103 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">package database
+		<pre class="file" id="file0" style="display: none">package api
+
+import (
+        "bookstore/model"
+        "bookstore/service"
+        "net/http"
+        "strconv"
+
+        "github.com/gin-gonic/gin"
+)
+
+func CreateBook(c *gin.Context) <span class="cov10" title="3">{
+        var book model.Book
+        if err := c.ShouldBindJSON(&amp;book); err != nil </span><span class="cov1" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov6" title="2">book, err := service.CreateBook(book)
+        if err != nil </span><span class="cov1" title="1">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov1" title="1">c.JSON(http.StatusCreated, book)</span>
+}
+
+func UpdateBook(c *gin.Context) <span class="cov10" title="3">{
+        var book model.Book
+        if err := c.ShouldBindJSON(&amp;book); err != nil </span><span class="cov1" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov6" title="2">book, err := service.UpdateBook(book)
+        if err != nil </span><span class="cov1" title="1">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov1" title="1">c.JSON(http.StatusOK, book)</span>
+}
+
+func DeleteBook(c *gin.Context) <span class="cov6" title="2">{
+        id, err := strconv.Atoi(c.Param("id"))
+        if err != nil </span><span class="cov1" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov1" title="1">book := service.GetBook(id)
+        service.DeleteBook(book)
+        c.JSON(http.StatusOK, book)</span>
+}
+
+func GetBook(c *gin.Context) <span class="cov10" title="3">{
+        id, err := strconv.Atoi(c.Param("id"))
+        if err != nil </span><span class="cov1" title="1">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov6" title="2">book := service.GetBook(id)
+        if book.ID == 0 </span><span class="cov1" title="1">{
+                c.JSON(http.StatusNotFound, gin.H{"error": "book not found"})
+                return
+        }</span>
+        <span class="cov1" title="1">c.JSON(http.StatusOK, book)</span>
+}
+
+func GetAllBooks(c *gin.Context) <span class="cov1" title="1">{
+        books := service.GetAllBooks()
+        c.JSON(http.StatusOK, books)
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package api
+
+import (
+        "bookstore/config"
+
+        "github.com/gin-gonic/gin"
+)
+
+var Router *gin.Engine
+
+func StartServer() <span class="cov0" title="0">{
+        r := gin.Default()
+        RegisterRoutes(r)
+        Router = r
+        r.Run(":" + config.Port)
+}</span>
+
+func RegisterRoutes(r *gin.Engine) <span class="cov8" title="1">{
+        r.GET("/books", GetAllBooks)
+        r.GET("/books/:id", GetBook)
+        r.POST("/books", CreateBook)
+        r.PUT("/books/:id", UpdateBook)
+        r.DELETE("/books/:id", DeleteBook)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package database
 
 import (
         "bookstore/config"
@@ -100,101 +196,28 @@ import (
 
 var DB *gorm.DB
 
-func InitializeDB() <span class="cov8" title="1">{
+func InitializeDB() <span class="cov10" title="2">{
         dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&amp;parseTime=True&amp;loc=UTC", config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port, config.Database.Database)
         db, err := gorm.Open(mysql.Open(dsn), &amp;gorm.Config{})
         if err != nil </span><span class="cov0" title="0">{
                 log.Fatalf("Failed to connect to database: %v", err)
         }</span>
-        <span class="cov8" title="1">log.Println("Connected to database")
-        db.AutoMigrate(&amp;model.Book{}, &amp;model.Order{}, &amp;model.OrderItem{})
+        <span class="cov10" title="2">log.Println("Connected to database")
+        db.AutoMigrate(&amp;model.Book{})
         DB = db</span>
 }
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package main
+		<pre class="file" id="file3" style="display: none">package main
 
 import (
+        "bookstore/api"
         "bookstore/database"
-        "fmt"
 )
 
 func main() <span class="cov0" title="0">{
-        fmt.Println("Hello, World!")
         database.InitializeDB()
-}</span>
-</pre>
-		
-		<pre class="file" id="file2" style="display: none">package model
-
-import "time"
-
-type Order struct {
-        ID        int         `json:"id" gorm:"primaryKey,autoIncrement"`
-        Total     float64     `json:"total"`
-        Items     []OrderItem `json:"items" gorm:"-"`
-        CreatedAt time.Time   `json:"created_at" gorm:"autoCreateTime,precision:6"`
-}
-
-type OrderItem struct {
-        OrderID  int  `json:"order_id" gorm:"primaryKey"`
-        BookID   int  `json:"book_id" gorm:"primaryKey"`
-        Book     Book `json:"book" gorm:"-"`
-        Quantity int  `json:"quantity"`
-}
-
-func (o *Order) CalculateTotal() <span class="cov10" title="6">{
-        o.Total = 0
-        for _, item := range o.Items </span><span class="cov10" title="6">{
-                o.Total += item.Book.Price * float64(item.Quantity)
-        }</span>
-}
-</pre>
-		
-		<pre class="file" id="file3" style="display: none">package service
-
-import (
-        "bookstore/database"
-        "bookstore/model"
-)
-
-func CreateBook(book model.Book) (model.Book, error) <span class="cov10" title="13">{
-        result := database.DB.Create(&amp;book)
-        if result.Error != nil </span><span class="cov1" title="1">{
-                return model.Book{}, result.Error
-        }</span>
-        <span class="cov9" title="12">return book, nil</span>
-}
-
-func UpdateBook(book model.Book) (model.Book, error) <span class="cov3" title="2">{
-        result := database.DB.Model(&amp;book).Updates(book)
-        if result.Error != nil </span><span class="cov1" title="1">{
-                return model.Book{}, result.Error
-        }</span>
-        <span class="cov1" title="1">return book, nil</span>
-}
-
-func DeleteBook(book model.Book) error <span class="cov3" title="2">{
-        result := database.DB.Delete(&amp;book)
-        if result.Error != nil </span><span class="cov1" title="1">{
-                return result.Error
-        }</span>
-        <span class="cov1" title="1">return nil</span>
-}
-
-func GetBook(id int) (model.Book, error) <span class="cov9" title="10">{
-        var book model.Book
-        result := database.DB.First(&amp;book, "id = ?", id)
-        if result.Error != nil </span><span class="cov4" title="3">{
-                return model.Book{}, result.Error
-        }</span>
-        <span class="cov7" title="7">return book, nil</span>
-}
-
-func GetAllBooks() []model.Book <span class="cov1" title="1">{
-        var books []model.Book
-        database.DB.Find(&amp;books)
-        return books
+        api.StartServer()
 }</span>
 </pre>
 		
@@ -203,82 +226,43 @@ func GetAllBooks() []model.Book <span class="cov1" title="1">{
 import (
         "bookstore/database"
         "bookstore/model"
-        "errors"
 )
 
-func CreateOrder(order model.Order) (model.Order, error) <span class="cov10" title="8">{
-        if len(order.Items) == 0 </span><span class="cov1" title="1">{
-                return model.Order{}, errors.New("order items are required")
+func CreateBook(book model.Book) (model.Book, error) <span class="cov10" title="8">{
+        result := database.DB.Create(&amp;book)
+        if result.Error != nil </span><span class="cov1" title="1">{
+                return model.Book{}, result.Error
         }</span>
-        <span class="cov9" title="7">for i, item := range order.Items </span><span class="cov9" title="7">{
-                if item.Quantity &lt;= 0 </span><span class="cov1" title="1">{
-                        return model.Order{}, errors.New("quantity must be greater than 0")
-                }</span>
-                <span class="cov8" title="6">book, err := GetBook(item.BookID)
-                if err != nil </span><span class="cov1" title="1">{
-                        return model.Order{}, err
-                }</span>
-                <span class="cov7" title="5">order.Items[i].Book = book</span>
-        }
-        <span class="cov7" title="5">order.CalculateTotal()
-        database.DB.Create(&amp;order)
-        for i := range order.Items </span><span class="cov7" title="5">{
-                order.Items[i].OrderID = order.ID
-        }</span>
-        <span class="cov7" title="5">database.DB.Create(&amp;order.Items)
-        return order, nil</span>
+        <span class="cov9" title="7">return book, nil</span>
 }
 
-func UpdateOrder(order model.Order) (model.Order, error) <span class="cov7" title="4">{
-        if len(order.Items) == 0 </span><span class="cov1" title="1">{
-                return model.Order{}, errors.New("order items are required")
+func UpdateBook(book model.Book) (model.Book, error) <span class="cov4" title="2">{
+        result := database.DB.Model(&amp;book).Updates(book)
+        if result.Error != nil </span><span class="cov1" title="1">{
+                return model.Book{}, result.Error
         }</span>
-        <span class="cov5" title="3">for i, item := range order.Items </span><span class="cov5" title="3">{
-                if item.Quantity &lt;= 0 </span><span class="cov1" title="1">{
-                        return model.Order{}, errors.New("quantity must be greater than 0")
-                }</span>
-                <span class="cov4" title="2">book, err := GetBook(item.BookID)
-                if err != nil </span><span class="cov1" title="1">{
-                        return model.Order{}, err
-                }</span>
-                <span class="cov1" title="1">order.Items[i].Book = book</span>
-        }
-        <span class="cov1" title="1">order.CalculateTotal()
-        database.DB.Model(&amp;order).Updates(order)
-        for i := range order.Items </span><span class="cov1" title="1">{
-                order.Items[i].OrderID = order.ID
-        }</span>
-        <span class="cov1" title="1">database.DB.Where("order_id = ?", order.ID).Delete(&amp;model.OrderItem{})
-        database.DB.Model(&amp;model.OrderItem{}).Updates(order.Items)
-        return order, nil</span>
+        <span class="cov1" title="1">return book, nil</span>
 }
 
-func DeleteOrder(order model.Order) error <span class="cov4" title="2">{
-        result := database.DB.Delete(&amp;order)
+func DeleteBook(book model.Book) error <span class="cov4" title="2">{
+        result := database.DB.Delete(&amp;book)
         if result.Error != nil </span><span class="cov1" title="1">{
                 return result.Error
         }</span>
         <span class="cov1" title="1">return nil</span>
 }
 
-func GetOrder(id int) (model.Order, error) <span class="cov4" title="2">{
-        var order model.Order
-        result := database.DB.Where("id = ?", id).First(&amp;order)
-        if result.Error != nil </span><span class="cov1" title="1">{
-                return model.Order{}, result.Error
-        }</span>
-        <span class="cov1" title="1">database.DB.Model(&amp;model.OrderItem{}).Where("order_id = ?", order.ID).Find(&amp;order.Items)
-        return order, nil</span>
-}
+func GetBook(id int) model.Book <span class="cov4" title="2">{
+        book := model.Book{}
+        database.DB.Find(&amp;book, "id = ?", id)
+        return book
+}</span>
 
-func GetAllOrders() []model.Order <span class="cov1" title="1">{
-        var orders []model.Order
-        database.DB.Find(&amp;orders)
-        for i := range orders </span><span class="cov1" title="1">{
-                database.DB.Model(&amp;model.OrderItem{}).Where("order_id = ?", orders[i].ID).Find(&amp;orders[i].Items)
-        }</span>
-        <span class="cov1" title="1">return orders</span>
-}
+func GetAllBooks() []model.Book <span class="cov1" title="1">{
+        books := []model.Book{}
+        database.DB.Find(&amp;books)
+        return books
+}</span>
 </pre>
 		
 		</div>

@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bookstore/api"
 	"bookstore/database"
-	"fmt"
 )
 
 func main() {
-	fmt.Println("Hello, World!")
 	database.InitializeDB()
+	api.StartServer()
 }
