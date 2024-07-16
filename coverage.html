@@ -59,7 +59,11 @@
 				
 				<option value="file1">bookstore/main.go (0.0%)</option>
 				
-				<option value="file2">bookstore/service/book.go (100.0%)</option>
+				<option value="file2">bookstore/model/order.go (100.0%)</option>
+				
+				<option value="file3">bookstore/service/book.go (100.0%)</option>
+				
+				<option value="file4">bookstore/service/order.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -121,22 +125,48 @@ func main() <span class="cov0" title="0">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package service
+		<pre class="file" id="file2" style="display: none">package model
+
+import "time"
+
+type Order struct {
+        ID        int         `json:"id" gorm:"primaryKey,autoIncrement"`
+        Total     float64     `json:"total"`
+        Items     []OrderItem `json:"items" gorm:"-"`
+        CreatedAt time.Time   `json:"created_at" gorm:"autoCreateTime,precision:6"`
+}
+
+type OrderItem struct {
+        OrderID  int  `json:"order_id" gorm:"primaryKey"`
+        BookID   int  `json:"book_id" gorm:"primaryKey"`
+        Book     Book `json:"book" gorm:"-"`
+        Quantity int  `json:"quantity"`
+}
+
+func (o *Order) CalculateTotal() <span class="cov10" title="6">{
+        o.Total = 0
+        for _, item := range o.Items </span><span class="cov10" title="6">{
+                o.Total += item.Book.Price * float64(item.Quantity)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package service
 
 import (
         "bookstore/database"
         "bookstore/model"
 )
 
-func CreateBook(book model.Book) (model.Book, error) <span class="cov10" title="8">{
+func CreateBook(book model.Book) (model.Book, error) <span class="cov10" title="13">{
         result := database.DB.Create(&amp;book)
         if result.Error != nil </span><span class="cov1" title="1">{
                 return model.Book{}, result.Error
         }</span>
-        <span class="cov9" title="7">return book, nil</span>
+        <span class="cov9" title="12">return book, nil</span>
 }
 
-func UpdateBook(book model.Book) (model.Book, error) <span class="cov4" title="2">{
+func UpdateBook(book model.Book) (model.Book, error) <span class="cov3" title="2">{
         result := database.DB.Model(&amp;book).Updates(book)
         if result.Error != nil </span><span class="cov1" title="1">{
                 return model.Book{}, result.Error
@@ -144,7 +174,7 @@ func UpdateBook(book model.Book) (model.Book, error) <span class="cov4" title="2
         <span class="cov1" title="1">return book, nil</span>
 }
 
-func DeleteBook(book model.Book) error <span class="cov4" title="2">{
+func DeleteBook(book model.Book) error <span class="cov3" title="2">{
         result := database.DB.Delete(&amp;book)
         if result.Error != nil </span><span class="cov1" title="1">{
                 return result.Error
@@ -152,13 +182,13 @@ func DeleteBook(book model.Book) error <span class="cov4" title="2">{
         <span class="cov1" title="1">return nil</span>
 }
 
-func GetBook(id uint) (model.Book, error) <span class="cov4" title="2">{
+func GetBook(id int) (model.Book, error) <span class="cov9" title="10">{
         var book model.Book
         result := database.DB.First(&amp;book, "id = ?", id)
-        if result.Error != nil </span><span class="cov1" title="1">{
+        if result.Error != nil </span><span class="cov4" title="3">{
                 return model.Book{}, result.Error
         }</span>
-        <span class="cov1" title="1">return book, nil</span>
+        <span class="cov7" title="7">return book, nil</span>
 }
 
 func GetAllBooks() []model.Book <span class="cov1" title="1">{
@@ -166,6 +196,89 @@ func GetAllBooks() []model.Book <span class="cov1" title="1">{
         database.DB.Find(&amp;books)
         return books
 }</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package service
+
+import (
+        "bookstore/database"
+        "bookstore/model"
+        "errors"
+)
+
+func CreateOrder(order model.Order) (model.Order, error) <span class="cov10" title="8">{
+        if len(order.Items) == 0 </span><span class="cov1" title="1">{
+                return model.Order{}, errors.New("order items are required")
+        }</span>
+        <span class="cov9" title="7">for i, item := range order.Items </span><span class="cov9" title="7">{
+                if item.Quantity &lt;= 0 </span><span class="cov1" title="1">{
+                        return model.Order{}, errors.New("quantity must be greater than 0")
+                }</span>
+                <span class="cov8" title="6">book, err := GetBook(item.BookID)
+                if err != nil </span><span class="cov1" title="1">{
+                        return model.Order{}, err
+                }</span>
+                <span class="cov7" title="5">order.Items[i].Book = book</span>
+        }
+        <span class="cov7" title="5">order.CalculateTotal()
+        database.DB.Create(&amp;order)
+        for i := range order.Items </span><span class="cov7" title="5">{
+                order.Items[i].OrderID = order.ID
+        }</span>
+        <span class="cov7" title="5">database.DB.Create(&amp;order.Items)
+        return order, nil</span>
+}
+
+func UpdateOrder(order model.Order) (model.Order, error) <span class="cov7" title="4">{
+        if len(order.Items) == 0 </span><span class="cov1" title="1">{
+                return model.Order{}, errors.New("order items are required")
+        }</span>
+        <span class="cov5" title="3">for i, item := range order.Items </span><span class="cov5" title="3">{
+                if item.Quantity &lt;= 0 </span><span class="cov1" title="1">{
+                        return model.Order{}, errors.New("quantity must be greater than 0")
+                }</span>
+                <span class="cov4" title="2">book, err := GetBook(item.BookID)
+                if err != nil </span><span class="cov1" title="1">{
+                        return model.Order{}, err
+                }</span>
+                <span class="cov1" title="1">order.Items[i].Book = book</span>
+        }
+        <span class="cov1" title="1">order.CalculateTotal()
+        database.DB.Model(&amp;order).Updates(order)
+        for i := range order.Items </span><span class="cov1" title="1">{
+                order.Items[i].OrderID = order.ID
+        }</span>
+        <span class="cov1" title="1">database.DB.Where("order_id = ?", order.ID).Delete(&amp;model.OrderItem{})
+        database.DB.Model(&amp;model.OrderItem{}).Updates(order.Items)
+        return order, nil</span>
+}
+
+func DeleteOrder(order model.Order) error <span class="cov4" title="2">{
+        result := database.DB.Delete(&amp;order)
+        if result.Error != nil </span><span class="cov1" title="1">{
+                return result.Error
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+
+func GetOrder(id int) (model.Order, error) <span class="cov4" title="2">{
+        var order model.Order
+        result := database.DB.Where("id = ?", id).First(&amp;order)
+        if result.Error != nil </span><span class="cov1" title="1">{
+                return model.Order{}, result.Error
+        }</span>
+        <span class="cov1" title="1">database.DB.Model(&amp;model.OrderItem{}).Where("order_id = ?", order.ID).Find(&amp;order.Items)
+        return order, nil</span>
+}
+
+func GetAllOrders() []model.Order <span class="cov1" title="1">{
+        var orders []model.Order
+        database.DB.Find(&amp;orders)
+        for i := range orders </span><span class="cov1" title="1">{
+                database.DB.Model(&amp;model.OrderItem{}).Where("order_id = ?", orders[i].ID).Find(&amp;orders[i].Items)
+        }</span>
+        <span class="cov1" title="1">return orders</span>
+}
 </pre>
 		
 		</div>

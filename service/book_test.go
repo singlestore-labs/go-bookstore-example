@@ -1,14 +1,9 @@
 package service
 
 import (
-	"bookstore/database"
 	"bookstore/model"
 	"testing"
 )
-
-func ResetBookTable() {
-	database.DB.Where("1 = 1").Delete(&model.Book{})
-}
 
 func TestCreateBook(t *testing.T) {
 	ResetBookTable()
@@ -129,7 +124,7 @@ func TestDeleteBook(t *testing.T) {
 		}
 
 		// Verify the book is deleted
-		_, getErr := GetBook(uint(createdBook.ID))
+		_, getErr := GetBook(createdBook.ID)
 		if getErr == nil {
 			t.Errorf("expected error when getting deleted book, got nil")
 		}
@@ -160,7 +155,7 @@ func TestGetBook(t *testing.T) {
 	createdBook, _ := CreateBook(book)
 
 	// Act
-	retrievedBook, err := GetBook(uint(createdBook.ID))
+	retrievedBook, err := GetBook(createdBook.ID)
 
 	// Assert
 	if err != nil {

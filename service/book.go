@@ -29,7 +29,7 @@ func DeleteBook(book model.Book) error {
 	return nil
 }
 
-func GetBook(id uint) (model.Book, error) {
+func GetBook(id int) (model.Book, error) {
 	var book model.Book
 	result := database.DB.First(&book, "id = ?", id)
 	if result.Error != nil {

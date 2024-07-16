@@ -10,7 +10,15 @@ type Order struct {
 }
 
 type OrderItem struct {
-	OrderID  int `json:"order_id" gorm:"primaryKey"`
-	BookID   int `json:"book_id" gorm:"primaryKey"`
-	Quantity int `json:"quantity"`
+	OrderID  int  `json:"order_id" gorm:"primaryKey"`
+	BookID   int  `json:"book_id" gorm:"primaryKey"`
+	Book     Book `json:"book" gorm:"-"`
+	Quantity int  `json:"quantity"`
+}
+
+func (o *Order) CalculateTotal() {
+	o.Total = 0
+	for _, item := range o.Items {
+		o.Total += item.Book.Price * float64(item.Quantity)
+	}
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"bookstore/config"
 	"bookstore/database"
+	"bookstore/model"
 	"context"
 	"log"
 	"os"
@@ -50,4 +51,12 @@ func TestMain(m *testing.M) {
 	// run tests
 	exitVal := m.Run()
 	os.Exit(exitVal)
+}
+
+func ResetBookTable() {
+	database.DB.Where("1 = 1").Delete(&model.Book{})
+}
+
+func ResetOrderTable() {
+	database.DB.Where("1 = 1").Delete(&model.Order{})
 }
