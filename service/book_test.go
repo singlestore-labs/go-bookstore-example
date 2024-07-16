@@ -11,95 +11,141 @@ func ResetBookTable() {
 }
 
 func TestCreateBook(t *testing.T) {
-	// Arrange
 	ResetBookTable()
-	book := model.Book{
-		Title:  "The Great Gatsby",
-		Author: "F. Scott Fitzgerald",
-		Price:  29.99,
-		Genre:  "Fiction",
-	}
+	createdID := 0
+	t.Run("Success", func(t *testing.T) {
+		// Arrange
+		book := model.Book{
+			Title:  "The Great Gatsby",
+			Author: "F. Scott Fitzgerald",
+			Price:  29.99,
+			Genre:  "Fiction",
+		}
 
-	// Act
-	createdBook, err := CreateBook(book)
+		// Act
+		createdBook, err := CreateBook(book)
+		createdID = createdBook.ID
 
-	// Assert
-	if err != nil {
-		t.Errorf("expected nil error, got %s", err)
-	} else if createdBook.ID == 0 {
-		t.Errorf("expected non-zero ID, got %d", createdBook.ID)
-	} else if createdBook.Title != book.Title {
-		t.Errorf("expected %s, got %s", book.Title, createdBook.Title)
-	} else if createdBook.Author != book.Author {
-		t.Errorf("expected %s, got %s", book.Author, createdBook.Author)
-	} else if createdBook.Price != book.Price {
-		t.Errorf("expected %f, got %f", book.Price, createdBook.Price)
-	} else if createdBook.Genre != book.Genre {
-		t.Errorf("expected %s, got %s", book.Genre, createdBook.Genre)
-	} else if createdBook.CreatedAt.IsZero() {
-		t.Errorf("expected non-zero CreatedAt, got %s", createdBook.CreatedAt)
-	} else if createdBook.UpdatedAt.IsZero() {
-		t.Errorf("expected non-zero UpdatedAt, got %s", createdBook.UpdatedAt)
-	}
+		// Assert
+		if err != nil {
+			t.Errorf("expected nil error, got %s", err)
+		} else if createdBook.ID == 0 {
+			t.Errorf("expected non-zero ID, got %d", createdBook.ID)
+		} else if createdBook.Title != book.Title {
+			t.Errorf("expected %s, got %s", book.Title, createdBook.Title)
+		} else if createdBook.Author != book.Author {
+			t.Errorf("expected %s, got %s", book.Author, createdBook.Author)
+		} else if createdBook.Price != book.Price {
+			t.Errorf("expected %f, got %f", book.Price, createdBook.Price)
+		} else if createdBook.Genre != book.Genre {
+			t.Errorf("expected %s, got %s", book.Genre, createdBook.Genre)
+		} else if createdBook.CreatedAt.IsZero() {
+			t.Errorf("expected non-zero CreatedAt, got %s", createdBook.CreatedAt)
+		} else if createdBook.UpdatedAt.IsZero() {
+			t.Errorf("expected non-zero UpdatedAt, got %s", createdBook.UpdatedAt)
+		}
+	})
+	t.Run("Error", func(t *testing.T) {
+		// Arrange
+		book := model.Book{ID: createdID}
+
+		// Act
+		_, err := CreateBook(book)
+
+		// Assert
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+	})
 }
 
 func TestUpdateBook(t *testing.T) {
-	// Arrange
 	ResetBookTable()
-	book := model.Book{
-		Title:  "The Great Gatsby",
-		Author: "F. Scott Fitzgerald",
-		Price:  29.99,
-		Genre:  "Fiction",
-	}
+	t.Run("Success", func(t *testing.T) {
+		// Arrange
+		book := model.Book{
+			Title:  "The Great Gatsby",
+			Author: "F. Scott Fitzgerald",
+			Price:  29.99,
+			Genre:  "Fiction",
+		}
+		book, _ = CreateBook(book)
 
-	// Act
-	updatedBook, err := UpdateBook(book)
+		// Act
+		book.Title = "The Amazing Gatsby"
+		updatedBook, err := UpdateBook(book)
 
-	// Assert
-	if err != nil {
-		t.Errorf("expected nil error, got %s", err)
-	} else if updatedBook.ID == 0 {
-		t.Errorf("expected non-zero ID, got %d", updatedBook.ID)
-	} else if updatedBook.Title != book.Title {
-		t.Errorf("expected %s, got %s", book.Title, updatedBook.Title)
-	} else if updatedBook.Author != book.Author {
-		t.Errorf("expected %s, got %s", book.Author, updatedBook.Author)
-	} else if updatedBook.Price != book.Price {
-		t.Errorf("expected %f, got %f", book.Price, updatedBook.Price)
-	} else if updatedBook.Genre != book.Genre {
-		t.Errorf("expected %s, got %s", book.Genre, updatedBook.Genre)
-	} else if updatedBook.CreatedAt.IsZero() {
-		t.Errorf("expected non-zero CreatedAt, got %s", updatedBook.CreatedAt)
-	} else if updatedBook.UpdatedAt.IsZero() {
-		t.Errorf("expected non-zero UpdatedAt, got %s", updatedBook.UpdatedAt)
-	}
+		// Assert
+		if err != nil {
+			t.Errorf("expected nil error, got %s", err)
+		} else if updatedBook.ID == 0 {
+			t.Errorf("expected non-zero ID, got %d", updatedBook.ID)
+		} else if updatedBook.Title != book.Title {
+			t.Errorf("expected %s, got %s", book.Title, updatedBook.Title)
+		} else if updatedBook.Author != book.Author {
+			t.Errorf("expected %s, got %s", book.Author, updatedBook.Author)
+		} else if updatedBook.Price != book.Price {
+			t.Errorf("expected %f, got %f", book.Price, updatedBook.Price)
+		} else if updatedBook.Genre != book.Genre {
+			t.Errorf("expected %s, got %s", book.Genre, updatedBook.Genre)
+		} else if updatedBook.CreatedAt.IsZero() {
+			t.Errorf("expected non-zero CreatedAt, got %s", updatedBook.CreatedAt)
+		} else if updatedBook.UpdatedAt.IsZero() {
+			t.Errorf("expected non-zero UpdatedAt, got %s", updatedBook.UpdatedAt)
+		}
+	})
+	t.Run("Error", func(t *testing.T) {
+		// Arrange
+		book := model.Book{Title: "The Great Gatsby"}
+
+		// Act
+		_, err := UpdateBook(book)
+
+		// Assert
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+	})
 }
 
 func TestDeleteBook(t *testing.T) {
-	// Arrange
 	ResetBookTable()
-	book := model.Book{
-		Title:  "To Kill a Mockingbird",
-		Author: "Harper Lee",
-		Price:  19.99,
-		Genre:  "Fiction",
-	}
-	createdBook, _ := CreateBook(book)
+	t.Run("Success", func(t *testing.T) {
+		// Arrange
+		book := model.Book{
+			Title:  "To Kill a Mockingbird",
+			Author: "Harper Lee",
+			Price:  19.99,
+			Genre:  "Fiction",
+		}
+		createdBook, _ := CreateBook(book)
 
-	// Act
-	err := DeleteBook(createdBook)
+		// Act
+		err := DeleteBook(createdBook)
 
-	// Assert
-	if err != nil {
-		t.Errorf("expected nil error, got %s", err)
-	}
+		// Assert
+		if err != nil {
+			t.Errorf("expected nil error, got %s", err)
+		}
 
-	// Verify the book is deleted
-	_, getErr := GetBook(uint(createdBook.ID))
-	if getErr == nil {
-		t.Errorf("expected error when getting deleted book, got nil")
-	}
+		// Verify the book is deleted
+		_, getErr := GetBook(uint(createdBook.ID))
+		if getErr == nil {
+			t.Errorf("expected error when getting deleted book, got nil")
+		}
+	})
+	t.Run("Error", func(t *testing.T) {
+		// Arrange
+		book := model.Book{}
+
+		// Act
+		err := DeleteBook(book)
+
+		// Assert
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+	})
 }
 
 func TestGetBook(t *testing.T) {

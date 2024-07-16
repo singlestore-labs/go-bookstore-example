@@ -14,17 +14,32 @@ func CreateBook(book model.Book) (model.Book, error) {
 }
 
 func UpdateBook(book model.Book) (model.Book, error) {
+	result := database.DB.Model(&book).Updates(book)
+	if result.Error != nil {
+		return model.Book{}, result.Error
+	}
 	return book, nil
 }
 
 func DeleteBook(book model.Book) error {
+	result := database.DB.Delete(&book)
+	if result.Error != nil {
+		return result.Error
+	}
 	return nil
 }
 
 func GetBook(id uint) (model.Book, error) {
-	return model.Book{}, nil
+	var book model.Book
+	result := database.DB.First(&book, "id = ?", id)
+	if result.Error != nil {
+		return model.Book{}, result.Error
+	}
+	return book, nil
 }
 
 func GetAllBooks() []model.Book {
-	return []model.Book{}
+	var books []model.Book
+	database.DB.Find(&books)
+	return books
 }

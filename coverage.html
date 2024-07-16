@@ -59,7 +59,7 @@
 				
 				<option value="file1">bookstore/main.go (0.0%)</option>
 				
-				<option value="file2">bookstore/service/book.go (75.0%)</option>
+				<option value="file2">bookstore/service/book.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -128,13 +128,44 @@ import (
         "bookstore/model"
 )
 
-func CreateBook(book model.Book) (model.Book, error) <span class="cov8" title="1">{
+func CreateBook(book model.Book) (model.Book, error) <span class="cov10" title="8">{
         result := database.DB.Create(&amp;book)
-        if result.Error != nil </span><span class="cov0" title="0">{
+        if result.Error != nil </span><span class="cov1" title="1">{
                 return model.Book{}, result.Error
         }</span>
-        <span class="cov8" title="1">return book, nil</span>
+        <span class="cov9" title="7">return book, nil</span>
 }
+
+func UpdateBook(book model.Book) (model.Book, error) <span class="cov4" title="2">{
+        result := database.DB.Model(&amp;book).Updates(book)
+        if result.Error != nil </span><span class="cov1" title="1">{
+                return model.Book{}, result.Error
+        }</span>
+        <span class="cov1" title="1">return book, nil</span>
+}
+
+func DeleteBook(book model.Book) error <span class="cov4" title="2">{
+        result := database.DB.Delete(&amp;book)
+        if result.Error != nil </span><span class="cov1" title="1">{
+                return result.Error
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+
+func GetBook(id uint) (model.Book, error) <span class="cov4" title="2">{
+        var book model.Book
+        result := database.DB.First(&amp;book, "id = ?", id)
+        if result.Error != nil </span><span class="cov1" title="1">{
+                return model.Book{}, result.Error
+        }</span>
+        <span class="cov1" title="1">return book, nil</span>
+}
+
+func GetAllBooks() []model.Book <span class="cov1" title="1">{
+        var books []model.Book
+        database.DB.Find(&amp;books)
+        return books
+}</span>
 </pre>
 		
 		</div>
