@@ -4,14 +4,6 @@
 
 This project demonstrates building a RESTful API for managing books using Golang and SingleStore. It follows test-driven development (TDD) principles and utilizes Testcontainers for efficient, reproducible testing.
 
-## Features
-
-- CRUD operations for books
-- Integration with SingleStore database
-- Test-driven development approach
-- Use of Testcontainers for isolated testing environments
-- Suitable for CI/CD pipelines
-
 ## Requirements
 
 - Go 1.22 or higher
