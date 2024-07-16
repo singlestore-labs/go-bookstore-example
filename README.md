@@ -1,5 +1,7 @@
 # SingleStore Go Bookstore
 
+**Attention**: The code in this repository is intended for experimental use only and is not fully tested, documented, or supported by SingleStore. Visit the [SingleStore Forums](https://www.singlestore.com/forum/) to ask questions about this repository.
+
 This project demonstrates building a RESTful API for managing books using Golang and SingleStore. It follows test-driven development (TDD) principles and utilizes Testcontainers for efficient, reproducible testing.
 
 ## Features
@@ -10,12 +12,12 @@ This project demonstrates building a RESTful API for managing books using Golang
 - Use of Testcontainers for isolated testing environments
 - Suitable for CI/CD pipelines
 
-## Prerequisites
+## Requirements
 
 - Go 1.22 or higher
 - Docker
 
-## Getting Started
+## Getting started
 
 1. Set up the database:
    - Create a SingleStore database.
@@ -33,7 +35,7 @@ This project demonstrates building a RESTful API for managing books using Golang
 
 The API will be available at `http://localhost:8080` (or the port specified in your configuration).
 
-## API Endpoints
+## API endpoints
 
 - `GET /books`: Retrieve all books
 - `GET /books/:id`: Retrieve a specific book
@@ -41,7 +43,7 @@ The API will be available at `http://localhost:8080` (or the port specified in y
 - `PUT /books/:id`: Update an existing book
 - `DELETE /books/:id`: Delete a book
 
-## Running Tests
+## Running tests
 
 To run the unit tests:
 ```
